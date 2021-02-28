@@ -2,14 +2,15 @@ package model;
 
 import model.rabbits.Rabbit;
 
-import java.util.ArrayList;
+import java.util.Vector;
+
 
 public class RabbitsStorage {
     private static RabbitsStorage instance;
-    private ArrayList<Rabbit> rabbitsList;
+    private Vector<Rabbit> rabbitsList;
 
     private RabbitsStorage() {
-        this.rabbitsList = new ArrayList<>();
+        this.rabbitsList = new Vector<>();
     }
 
     public static RabbitsStorage getInstance() {
@@ -19,7 +20,7 @@ public class RabbitsStorage {
         return instance;
     }
 
-    public ArrayList<Rabbit> getRabbitsList() {
+    public Vector<Rabbit> getRabbitsList() {
         return rabbitsList;
     }
 }

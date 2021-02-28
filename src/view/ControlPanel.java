@@ -9,6 +9,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashMap;
+import java.util.TreeSet;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
@@ -23,6 +25,7 @@ public class ControlPanel extends JPanel {
     JButton stopButton;
     JButton showInfoButton;
     JButton settingsButton;
+    JButton showObjectsButton;
     JButton saveButton;
     JRadioButton showTimeButton;
     JRadioButton hideTimeButton;
@@ -32,8 +35,13 @@ public class ControlPanel extends JPanel {
     JTextField periodOfOrdinary;
     JTextField periodOfAlbinos;
     JTextField percentOfAlbinos;
+    JTextField livingTimeOrdinary;
+    JTextField livingTimeAlbinos;
     JComboBox<String> chanceOfOrdinary = new JComboBox<String>();
     MyFrame frame;
+
+    HashMap<String,String> timeList;
+    TreeSet<String> idList;
     ControlPanel() {
         super();
         setLayout(new GridLayout(3, 1));
@@ -45,11 +53,12 @@ public class ControlPanel extends JPanel {
         buttonsStartStopPanel = new JPanel(new GridLayout(2, 1));
         buttonsShowHideGroup  = new ButtonGroup ();
         buttonsShowHidePanel = new JPanel(new GridLayout(2, 1));
-        buttonsLast = new JPanel(new GridLayout(2, 1));
+        buttonsLast = new JPanel(new GridLayout(3, 1));
         buttonsStartStopPanel.setPreferredSize(new Dimension(200, 200));
         buttonsStartStopPanel.setBackground(Color.decode("#E6E6FA"));
         dialog = new JDialog(frame, "Settings", true);
-        configurationPanel = new JPanel(new GridLayout(4, 2));
+        configurationPanel = new JPanel(new GridLayout(6, 2));
+
 
         startButton = new JButton("Start");
         stopButton = new JButton("Stop");
@@ -57,9 +66,13 @@ public class ControlPanel extends JPanel {
         hideTimeButton = new JRadioButton("Hide time");
         showInfoButton = new JButton("Show information");
         settingsButton = new JButton("Settings");
+        showObjectsButton = new JButton("Show objects");
         periodOfOrdinary = new JTextField("1");
         periodOfAlbinos = new JTextField("2");
         percentOfAlbinos = new JTextField("50");
+        livingTimeAlbinos = new JTextField("5");
+        livingTimeOrdinary = new JTextField("5");
+
         saveButton = new JButton("Save");
         dialogError = new JDialog(frame, "Error", true);
         dialogError.setLayout(new FlowLayout());
@@ -78,6 +91,7 @@ public class ControlPanel extends JPanel {
         hideTimeButton.setFocusable(false);
         showInfoButton.setFocusable(false);
         settingsButton.setFocusable(false);
+        showObjectsButton.setFocusable(false);
 
         buttonsStartStopPanel.add(startButton);
         buttonsStartStopPanel.add(stopButton);
@@ -87,6 +101,7 @@ public class ControlPanel extends JPanel {
         buttonsShowHidePanel.add(hideTimeButton);
         buttonsLast.add(showInfoButton);
         buttonsLast.add(settingsButton);
+        buttonsLast.add(showObjectsButton);
         for (int i = 10; i<=100; i+=10){
             chanceOfOrdinary.addItem(i+"%");
         }
@@ -95,6 +110,8 @@ public class ControlPanel extends JPanel {
         periodOfAlbinos.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         periodOfOrdinary.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         percentOfAlbinos.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        livingTimeOrdinary.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        livingTimeAlbinos.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
         configurationPanel.add(new JLabel("Chance", JLabel.CENTER));
         configurationPanel.add(chanceOfOrdinary);
@@ -107,6 +124,12 @@ public class ControlPanel extends JPanel {
 
         configurationPanel.add(new JLabel("Albino percentage ", JLabel.CENTER));
         configurationPanel.add(percentOfAlbinos);
+
+        configurationPanel.add(new JLabel("Albino living time ", JLabel.CENTER));
+        configurationPanel.add(livingTimeAlbinos);
+
+        configurationPanel.add(new JLabel("Ordinary living time ", JLabel.CENTER));
+        configurationPanel.add(livingTimeOrdinary);
 
         GridBagLayout gbl = new GridBagLayout();
         dialog.setLayout(gbl);
@@ -134,7 +157,7 @@ public class ControlPanel extends JPanel {
 
 
         dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        dialog.setPreferredSize(new Dimension(400,400));
+        dialog.setPreferredSize(new Dimension(400,500));
         dialog.setResizable(false);
         dialog.pack();
         dialog.setLocationRelativeTo(this);
@@ -184,18 +207,30 @@ public class ControlPanel extends JPanel {
         });
         settingsButton.addActionListener(listener -> {
             dialog.setVisible(true);
-
         });
         saveButton.addActionListener(listener -> {
             controller.stopBornProcessFinally();
             boolean error = false;
-            int P1, N1,N2;
-            double K;
+            int P1 = 100, N1 = 1,N2 = 2, livingTimeOrdinaryI = 5, livingTimeAlbinosI = 5;
+            double K = 50;
             String P1S =chanceOfOrdinary.getSelectedItem().toString();
-            P1 = Integer.parseInt(P1S.substring(0,P1S.length()-1));
-            N1 = Integer.parseInt(periodOfOrdinary.getText());
-            N2 = Integer.parseInt(periodOfAlbinos.getText());
-            K = Double.parseDouble(percentOfAlbinos.getText());
+            try {
+                P1 = Integer.parseInt(P1S.substring(0, P1S.length() - 1));
+                N1 = Integer.parseInt(periodOfOrdinary.getText());
+                N2 = Integer.parseInt(periodOfAlbinos.getText());
+                K = Double.parseDouble(percentOfAlbinos.getText());
+                livingTimeOrdinaryI = Integer.parseInt(livingTimeOrdinary.getText());
+                livingTimeAlbinosI = Integer.parseInt(livingTimeAlbinos.getText());
+            }
+            catch (NumberFormatException e){
+                error = true;
+                periodOfOrdinary.setText("1");
+                periodOfAlbinos.setText("2");
+                livingTimeOrdinary.setText("5");
+                livingTimeAlbinos.setText("5");
+                percentOfAlbinos.setText("50");
+                chanceOfOrdinary.setSelectedIndex(9);
+            }
             if(N1<1){
                 error = true;
                 N1 = 1;
@@ -206,17 +241,34 @@ public class ControlPanel extends JPanel {
                 N2 = 2;
                 periodOfAlbinos.setText("2");
             }
+            if(livingTimeOrdinaryI<1){
+                error = true;
+                livingTimeOrdinaryI = 5;
+                livingTimeOrdinary.setText("5");
+            }
+            if(livingTimeAlbinosI<1){
+                error = true;
+                livingTimeAlbinosI = 5;
+                livingTimeAlbinos.setText("5");
+            }
             if(K<1 || K>100){
                 error = true;
-                K = 100;
-                percentOfAlbinos.setText("100");
+                K = 50;
+                percentOfAlbinos.setText("50");
             }
             if(error){
                 dialogError.setVisible(true);
             }
-            frame.configureHabitat(new Habitat(N1,N2,P1, K ,frame));
+            frame.configureHabitat(new Habitat(N1,N2,P1, K ,frame, livingTimeOrdinaryI, livingTimeAlbinosI));
             dialog.setVisible(false);
 
+        });
+        showObjectsButton.addActionListener(listener -> {
+            ObjectsFrame objectsFrame = new ObjectsFrame(timeList, idList, frame, "Object list", true);
+            controller.stopBornProcess();
+            objectsFrame.update();
+            objectsFrame.setVisible(true);
+            controller.startBornProcess();
         });
     }
 
@@ -228,6 +280,10 @@ public class ControlPanel extends JPanel {
     }
     public void configureFrame(MyFrame frame) {
         this.frame = frame;
+    }
+    public void configureLists(HashMap<String, String> timeList, TreeSet<String> idList) {
+        this.timeList = timeList;
+        this.idList = idList;
     }
     public void disableStartButton(){
         this.startButton.setEnabled(false);

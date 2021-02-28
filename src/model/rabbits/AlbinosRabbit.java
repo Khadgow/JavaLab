@@ -17,8 +17,8 @@ public class AlbinosRabbit extends Rabbit {
         }
     }
 
-    AlbinosRabbit(int x, int y, String pathToImg) {
-        super(x, y, pathToImg);
+    AlbinosRabbit(int x, int y, String pathToImg, int id) {
+        super(x, y, pathToImg, id);
         numberOfAlbinos++;
         countAllRabbits++;
     }

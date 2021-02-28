@@ -7,7 +7,8 @@ import model.rabbits.Rabbit;
 import view.MyField;
 import view.MyFrame;
 
-import java.util.ArrayList;
+import java.util.Vector;
+
 //Controller - реалезует различные методы для field, habitat, frame
 public class Controller {
     private MyField m;
@@ -19,7 +20,7 @@ public class Controller {
         this.frame = frame;
     }
 
-    public void toPaint(ArrayList<Rabbit> rabbits) {
+    public void toPaint(Vector<Rabbit> rabbits) {
         m.paintRabbit(rabbits);
     }
 

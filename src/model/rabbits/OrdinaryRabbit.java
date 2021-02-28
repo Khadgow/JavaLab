@@ -17,8 +17,8 @@ public class OrdinaryRabbit extends Rabbit {
         }
     }
 
-    OrdinaryRabbit(int x, int y, String pathToImg) {
-        super(x, y, pathToImg);
+    OrdinaryRabbit(int x, int y, String pathToImg, int id) {
+        super(x, y, pathToImg, id);
         numberOfOrdinary++;
         countAllRabbits++;
     }

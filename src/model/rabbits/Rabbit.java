@@ -3,22 +3,15 @@ package model.rabbits;
 public abstract class Rabbit implements IBehaviour {
     private int x;
     private int y;
+    public int id;
     public static int countAllRabbits = 0;
     private String pathToImg;
 
-    Rabbit(int x, int y, String pathToImg) {
+    Rabbit(int x, int y, String pathToImg, int id) {
         this.x = x;
         this.y = y;
         this.pathToImg = pathToImg;
-    }
-
-    public String getPathToImg() {
-        return pathToImg;
-    }
-
-    @Override
-    public void move(int x, int y) {
-
+        this.id = id;
     }
 
     @Override

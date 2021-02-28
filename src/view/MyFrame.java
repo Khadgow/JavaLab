@@ -18,13 +18,14 @@ public class MyFrame extends JFrame implements KeyListener {
     final private int controlPanelSize = 200;
 
     public MyFrame() {
-        habitat = new Habitat(1, 2, 100, 50, this);
+        habitat = new Habitat(1, 2, 100, 50, this, 5, 5);
         myField = new MyField();
         controller = new Controller(myField, habitat, this);
         habitat.confifureController(controller);
         myField.configureController(controller);
         controlPanel = new ControlPanel();
         controlPanel.configureController(controller);
+        controlPanel.configureLists(habitat.getTimeList(), habitat.getIdList());
 
         setTitle("Rabbits");
         setPreferredSize(new Dimension(habitat.getWidth() + controlPanelSize, habitat.getHeight()));
@@ -47,6 +48,7 @@ public class MyFrame extends JFrame implements KeyListener {
     }
 
     public void updateTime(int time) {
+        controlPanel.configureLists(habitat.getTimeList(), habitat.getIdList());
         this.time = time;
         timeLabel.setText("Passed time: " + time / 60 + " minutes " + time % 60 + " seconds");
     }
@@ -88,6 +90,7 @@ public class MyFrame extends JFrame implements KeyListener {
         this.habitat = habitat;
         habitat.confifureController(controller);
         controller.configurateHabitat(habitat);
+        controlPanel.configureLists(habitat.getTimeList(), habitat.getIdList());
     }
 
     public void showFinishDialog() {

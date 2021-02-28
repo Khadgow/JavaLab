@@ -7,17 +7,17 @@ import model.rabbits.Rabbit;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Vector;
 
 public class MyField extends JPanel {
-    ArrayList<Rabbit> rabbits = new ArrayList<>();
+    Vector<Rabbit> rabbits = new Vector<>();
     Controller controller;
 
     public MyField() {
         super();
     }
 
-    public void paintRabbit(ArrayList<Rabbit> rabbits) {
+    public void paintRabbit(Vector<Rabbit> rabbits) {
         this.rabbits = rabbits;
         repaint();
     }
