@@ -1,17 +1,21 @@
-package model.rabbits;
+package RabbitsPackage.Rabbits;
 
 public abstract class Rabbit implements IBehaviour {
     private int x;
     private int y;
     public int id;
     public static int countAllRabbits = 0;
-    private String pathToImg;
 
-    Rabbit(int x, int y, String pathToImg, int id) {
+    Rabbit(int x, int y, int id) {
         this.x = x;
         this.y = y;
-        this.pathToImg = pathToImg;
         this.id = id;
+    }
+
+
+    @Override
+    public void move(int x, int y) {
+
     }
 
     @Override

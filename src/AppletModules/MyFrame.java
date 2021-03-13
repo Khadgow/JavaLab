@@ -1,7 +1,7 @@
-package view;
+package AppletModules;
 
-import controller.Controller;
-import model.habitat.Habitat;
+import RabbitsPackage.ControlFiles.Controller;
+import RabbitsPackage.ControlFiles.Habitat;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,7 +39,7 @@ public class MyFrame extends JFrame implements KeyListener {
         timeLabel = new JLabel("Passed time: " + time / 60 + " minutes " + time % 60 + " seconds", SwingConstants.CENTER);
         controlPanel.configureTimeLabel(timeLabel);
         controlPanel.configureFrame(this);
-        add(timeLabel, BorderLayout.SOUTH);
+        myField.add(timeLabel, BorderLayout.SOUTH);
         addKeyListener(this);
         pack();
         setLocationRelativeTo(null);
@@ -58,15 +58,13 @@ public class MyFrame extends JFrame implements KeyListener {
         switch (keyEvent.getKeyChar()) {
             case 'b':
                 if (!controller.isBornProcessOn()) {
-                    //myField = new MyField();
-                    //myField.configureController(controller);
                     controller.startBornProcess();
                     controlPanel.disableStartButton();
                 }
                 break;
             case 'e':
                 if (controller.isBornProcessOn()) {
-                    controller.stopBornProcess();
+                    controller.stopCreateProcess();
                     controlPanel.disableStopButton();
                 }
                 showFinishDialog();
@@ -143,7 +141,7 @@ public class MyFrame extends JFrame implements KeyListener {
         });
         okButton.addActionListener(listener -> {
             controlPanel.disableStopButton();
-            controller.stopBornProcessFinally();
+            controller.stopCreateProcessFinally();
             dialog.setVisible(false);
         });
 

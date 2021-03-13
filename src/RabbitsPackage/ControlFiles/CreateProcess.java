@@ -1,20 +1,18 @@
-package bornProcess;
-
-import model.habitat.Habitat;
+package RabbitsPackage.ControlFiles;
 
 import java.util.TimerTask;
 
 //BornProcess - реализует таймер, вызывает метод update у habitat
-public class BornProcess extends TimerTask {
+public class CreateProcess extends TimerTask {
     Habitat h;
     int sec;
     int gameSec;
     int min;
 
-    public BornProcess(Habitat h) {
+    public CreateProcess(Habitat h) {
         this.h = h;
     }
-    public BornProcess(Habitat h, BornProcess bp) {
+    public CreateProcess(Habitat h, CreateProcess bp) {
         this.h = h;
         this.sec = bp.sec;
         this.min = bp.min;

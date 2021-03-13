@@ -1,4 +1,4 @@
-package model.rabbits;
+package RabbitsPackage.Rabbits;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,8 +17,8 @@ public class OrdinaryRabbit extends Rabbit {
         }
     }
 
-    OrdinaryRabbit(int x, int y, String pathToImg, int id) {
-        super(x, y, pathToImg, id);
+    public OrdinaryRabbit(int x, int y, int id) {
+        super(x, y, id);
         numberOfOrdinary++;
         countAllRabbits++;
     }

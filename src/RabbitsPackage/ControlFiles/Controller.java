@@ -1,12 +1,12 @@
-package controller;
+package RabbitsPackage.ControlFiles;
 
-import model.habitat.Habitat;
-import model.rabbits.AlbinosRabbit;
-import model.rabbits.OrdinaryRabbit;
-import model.rabbits.Rabbit;
-import view.MyField;
-import view.MyFrame;
+import RabbitsPackage.Rabbits.AlbinosRabbit;
+import RabbitsPackage.Rabbits.OrdinaryRabbit;
+import RabbitsPackage.Rabbits.Rabbit;
+import AppletModules.MyField;
+import AppletModules.MyFrame;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 //Controller - реалезует различные методы для field, habitat, frame
@@ -24,20 +24,20 @@ public class Controller {
         m.paintRabbit(rabbits);
     }
 
-    public void stopBornProcess() {
-        habitat.stopBorn();
+    public void stopCreateProcess() {
+        habitat.stopCreate();
     }
-    public void stopBornProcessFinally() {
-        habitat.stopBornFinally();
+    public void stopCreateProcessFinally() {
+        habitat.stopCreateFinally();
         refreshRabbitPopulation();
     }
 
     public void startBornProcess() {
-        habitat.startBorn();
+        habitat.startCreate();
     }
 
     public boolean isBornProcessOn() {
-        return habitat.isBornProcessOn();
+        return habitat.isCreateProcessOn();
     }
 
     public int getOrdinaryRabbitsAmount() {

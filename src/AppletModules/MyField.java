@@ -1,12 +1,13 @@
-package view;
+package AppletModules;
 
-import controller.Controller;
-import model.rabbits.AlbinosRabbit;
-import model.rabbits.OrdinaryRabbit;
-import model.rabbits.Rabbit;
+import RabbitsPackage.ControlFiles.Controller;
+import RabbitsPackage.Rabbits.AlbinosRabbit;
+import RabbitsPackage.Rabbits.OrdinaryRabbit;
+import RabbitsPackage.Rabbits.Rabbit;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Vector;
 
 public class MyField extends JPanel {

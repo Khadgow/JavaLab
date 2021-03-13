@@ -1,14 +1,12 @@
-package view;
+package AppletModules;
 
-import controller.Controller;
-import model.habitat.Habitat;
+import RabbitsPackage.ControlFiles.Controller;
+import RabbitsPackage.ControlFiles.Habitat;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.TreeSet;
 
@@ -189,7 +187,7 @@ public class ControlPanel extends JPanel {
         stopButton.addActionListener(listener -> {
             stopButton.setEnabled(false);
             startButton.setEnabled(true);
-            controller.stopBornProcess();
+            controller.stopCreateProcess();
         });
 
         showTimeButton.addActionListener(listener -> {
@@ -200,7 +198,7 @@ public class ControlPanel extends JPanel {
         });
         showInfoButton.addActionListener(listener -> {
             if (controller.isBornProcessOn()) {
-                controller.stopBornProcess();
+                controller.stopCreateProcess();
                 disableStopButton();
             }
             frame.showFinishDialog();
@@ -209,7 +207,7 @@ public class ControlPanel extends JPanel {
             dialog.setVisible(true);
         });
         saveButton.addActionListener(listener -> {
-            controller.stopBornProcessFinally();
+            controller.stopCreateProcessFinally();
             boolean error = false;
             int P1 = 100, N1 = 1,N2 = 2, livingTimeOrdinaryI = 5, livingTimeAlbinosI = 5;
             double K = 50;
@@ -265,7 +263,7 @@ public class ControlPanel extends JPanel {
         });
         showObjectsButton.addActionListener(listener -> {
             ObjectsFrame objectsFrame = new ObjectsFrame(timeList, idList, frame, "Object list", true);
-            controller.stopBornProcess();
+            controller.stopCreateProcess();
             objectsFrame.update();
             objectsFrame.setVisible(true);
             controller.startBornProcess();

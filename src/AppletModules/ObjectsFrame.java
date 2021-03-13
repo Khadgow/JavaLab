@@ -1,4 +1,4 @@
-package view;
+package AppletModules;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +8,6 @@ import java.util.TreeSet;
 
 
 public class ObjectsFrame extends JDialog {
-    //JButton okButton = new JButton("OK");
     HashMap<String, String> timeList;
     TreeSet<String> idList;
     public ObjectsFrame(HashMap<String, String> timeList, TreeSet<String> idList, JFrame p, String t, boolean modal){
