@@ -21,10 +21,12 @@ public class Habitat {
     CreateProcess createProcess = new CreateProcess(this);
     private int livingTimeOrdinary;
     private int livingTimeAlbinos;
+    private AlbinosRabbitAI albinosAI;
+    private OrdinaryRabbitAI ordinaryAI;
     private TreeSet<String> idList = new TreeSet<>();
     private HashMap<String,String> timeList = new HashMap<>();
 
-    public Habitat(int N1, int N2, int P1, double K, MyFrame myframe, int livingTimeOrdinary, int livingTimeAlbinos) {
+    public  Habitat(int N1, int N2, int P1, double K, MyFrame myframe, int livingTimeOrdinary, int livingTimeAlbinos) {
         this.N1 = N1;
         this.N2 = N2;
         this.P1 = P1;
@@ -61,6 +63,9 @@ public class Habitat {
 
         controller.passTime(time);
 
+
+
+
         Vector<String> removeId = new Vector<>();
         Iterator<String> iter = idList.iterator();
         while (iter.hasNext()){
@@ -75,7 +80,6 @@ public class Habitat {
                             removeId.add(id);
                             rabbitsList.remove(rabbit);
                         }
-
                     }
                 }
 
@@ -113,6 +117,7 @@ public class Habitat {
 
             Point randomPoint = generatePoint();
             Rabbit newRabbit = new AlbinosRabbit(randomPoint.x, randomPoint.y, id);
+
             rabbitsList.add(newRabbit);
             controller.toPaint(rabbitsList);
         }
@@ -120,7 +125,7 @@ public class Habitat {
 
     public void startCreate() {
         createProcessOn = true;
-        timer.schedule(createProcess, 0, 1000);
+        timer.schedule(createProcess, 0, 100);
 
     }
 
@@ -128,7 +133,7 @@ public class Habitat {
         timer.cancel();
         timer.purge();
         timer = new Timer();
-        createProcess = new CreateProcess(this , createProcess);
+        createProcess = new CreateProcess(this , createProcess, controller.getM());
         createProcessOn = false;
     }
 
@@ -149,6 +154,13 @@ public class Habitat {
 
     public void confifureController(Controller controller) {
         this.controller = controller;
+        createProcess = new CreateProcess(this, controller.getM());
+        ordinaryAI = new OrdinaryRabbitAI(rabbitsList, createProcess, controller);
+        ordinaryAI.continue_();
+        ordinaryAI.start();
+        albinosAI = new AlbinosRabbitAI(rabbitsList, createProcess);
+        albinosAI.continue_();
+        albinosAI.start();
     }
 
     public boolean isCreateProcessOn() {
@@ -160,4 +172,6 @@ public class Habitat {
     public TreeSet<String> getIdList() {
         return idList;
     }
+    public AlbinosRabbitAI getAlbinosAI() { return albinosAI; }
+    public OrdinaryRabbitAI getOrdinaryAI() { return ordinaryAI; }
 }

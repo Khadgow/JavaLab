@@ -2,6 +2,8 @@ package AppletModules;
 
 import RabbitsPackage.ControlFiles.Controller;
 import RabbitsPackage.ControlFiles.Habitat;
+import RabbitsPackage.Rabbits.AlbinosRabbitAI;
+import RabbitsPackage.Rabbits.OrdinaryRabbitAI;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -25,6 +27,8 @@ public class ControlPanel extends JPanel {
     JButton settingsButton;
     JButton showObjectsButton;
     JButton saveButton;
+    JButton startStopMoveOrdinary;
+    JButton startStopMoveAlbinos;
     JRadioButton showTimeButton;
     JRadioButton hideTimeButton;
     JDialog dialog;
@@ -36,7 +40,11 @@ public class ControlPanel extends JPanel {
     JTextField livingTimeOrdinary;
     JTextField livingTimeAlbinos;
     JComboBox<String> chanceOfOrdinary = new JComboBox<String>();
+    JComboBox<String> ordinaryAIPriority = new JComboBox<String>();
+    JComboBox<String> albinosAIPriority = new JComboBox<String>();
     MyFrame frame;
+    AlbinosRabbitAI albinosAI;
+    OrdinaryRabbitAI ordinaryAI;
 
     HashMap<String,String> timeList;
     TreeSet<String> idList;
@@ -51,11 +59,11 @@ public class ControlPanel extends JPanel {
         buttonsStartStopPanel = new JPanel(new GridLayout(2, 1));
         buttonsShowHideGroup  = new ButtonGroup ();
         buttonsShowHidePanel = new JPanel(new GridLayout(2, 1));
-        buttonsLast = new JPanel(new GridLayout(3, 1));
+        buttonsLast = new JPanel(new GridLayout(5, 1));
         buttonsStartStopPanel.setPreferredSize(new Dimension(200, 200));
         buttonsStartStopPanel.setBackground(Color.decode("#E6E6FA"));
         dialog = new JDialog(frame, "Settings", true);
-        configurationPanel = new JPanel(new GridLayout(6, 2));
+        configurationPanel = new JPanel(new GridLayout(8, 2));
 
 
         startButton = new JButton("Start");
@@ -65,6 +73,8 @@ public class ControlPanel extends JPanel {
         showInfoButton = new JButton("Show information");
         settingsButton = new JButton("Settings");
         showObjectsButton = new JButton("Show objects");
+        startStopMoveOrdinary = new JButton("Stop ordinary move");
+        startStopMoveAlbinos = new JButton("Stop albinos move");
         periodOfOrdinary = new JTextField("1");
         periodOfAlbinos = new JTextField("2");
         percentOfAlbinos = new JTextField("50");
@@ -90,6 +100,8 @@ public class ControlPanel extends JPanel {
         showInfoButton.setFocusable(false);
         settingsButton.setFocusable(false);
         showObjectsButton.setFocusable(false);
+        startStopMoveOrdinary.setFocusable(false);
+        startStopMoveAlbinos.setFocusable(false);
 
         buttonsStartStopPanel.add(startButton);
         buttonsStartStopPanel.add(stopButton);
@@ -100,9 +112,21 @@ public class ControlPanel extends JPanel {
         buttonsLast.add(showInfoButton);
         buttonsLast.add(settingsButton);
         buttonsLast.add(showObjectsButton);
+        buttonsLast.add(startStopMoveOrdinary);
+        buttonsLast.add(startStopMoveAlbinos);
         for (int i = 10; i<=100; i+=10){
             chanceOfOrdinary.addItem(i+"%");
         }
+
+        chanceOfOrdinary.setSelectedIndex(9);
+
+        ordinaryAIPriority.addItem("High");
+        ordinaryAIPriority.addItem("Normal");
+        ordinaryAIPriority.addItem("Low");
+
+        albinosAIPriority.addItem("High");
+        albinosAIPriority.addItem("Normal");
+        albinosAIPriority.addItem("Low");
 
         chanceOfOrdinary.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         periodOfAlbinos.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
@@ -110,6 +134,8 @@ public class ControlPanel extends JPanel {
         percentOfAlbinos.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         livingTimeOrdinary.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         livingTimeAlbinos.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        ordinaryAIPriority.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        albinosAIPriority.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
         configurationPanel.add(new JLabel("Chance", JLabel.CENTER));
         configurationPanel.add(chanceOfOrdinary);
@@ -128,6 +154,12 @@ public class ControlPanel extends JPanel {
 
         configurationPanel.add(new JLabel("Ordinary living time ", JLabel.CENTER));
         configurationPanel.add(livingTimeOrdinary);
+
+        configurationPanel.add(new JLabel("Ordinary AI priority ", JLabel.CENTER));
+        configurationPanel.add(ordinaryAIPriority);
+
+        configurationPanel.add(new JLabel("Albinos AI priority ", JLabel.CENTER));
+        configurationPanel.add(albinosAIPriority);
 
         GridBagLayout gbl = new GridBagLayout();
         dialog.setLayout(gbl);
@@ -155,7 +187,7 @@ public class ControlPanel extends JPanel {
 
 
         dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        dialog.setPreferredSize(new Dimension(400,500));
+        dialog.setPreferredSize(new Dimension(400,550));
         dialog.setResizable(false);
         dialog.pack();
         dialog.setLocationRelativeTo(this);
@@ -182,7 +214,7 @@ public class ControlPanel extends JPanel {
         startButton.addActionListener(listener -> {
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
-            controller.startBornProcess();
+            controller.startCreateProcess();
         });
         stopButton.addActionListener(listener -> {
             stopButton.setEnabled(false);
@@ -196,8 +228,26 @@ public class ControlPanel extends JPanel {
         hideTimeButton.addActionListener(listener -> {
             timeLabel.setVisible(false);
         });
+        startStopMoveOrdinary.addActionListener(listener -> {
+            ordinaryAI.changeState();
+            if(ordinaryAI.isRunning()){
+                startStopMoveOrdinary.setText("Stop ordinary move");
+            } else {
+                startStopMoveOrdinary.setText("Continue ordinary move");
+            }
+
+
+        });
+        startStopMoveAlbinos.addActionListener(listener -> {
+            albinosAI.changeState();
+            if(albinosAI.isRunning()){
+                startStopMoveAlbinos.setText("Stop ordinary move");
+            } else {
+                startStopMoveAlbinos.setText("Continue ordinary move");
+            }
+        });
         showInfoButton.addActionListener(listener -> {
-            if (controller.isBornProcessOn()) {
+            if (controller.isCreateProcessOn()) {
                 controller.stopCreateProcess();
                 disableStopButton();
             }
@@ -211,7 +261,23 @@ public class ControlPanel extends JPanel {
             boolean error = false;
             int P1 = 100, N1 = 1,N2 = 2, livingTimeOrdinaryI = 5, livingTimeAlbinosI = 5;
             double K = 50;
-            String P1S =chanceOfOrdinary.getSelectedItem().toString();
+            disableStopButton();
+            String P1S = chanceOfOrdinary.getSelectedItem().toString();
+            if(ordinaryAIPriority.getSelectedItem().toString().equals("High")){
+                ordinaryAI.setPriority(Thread.MAX_PRIORITY);
+            } else if (ordinaryAIPriority.getSelectedItem().toString().equals("Low")) {
+                ordinaryAI.setPriority(Thread.MIN_PRIORITY);
+            } else {
+                ordinaryAI.setPriority(Thread.NORM_PRIORITY);
+            }
+
+            if(albinosAIPriority.getSelectedItem().toString().equals("High")){
+                albinosAI.setPriority(Thread.MAX_PRIORITY);
+            } else if (albinosAIPriority.getSelectedItem().toString().equals("Low")) {
+                albinosAI.setPriority(Thread.MIN_PRIORITY);
+            } else {
+                albinosAI.setPriority(Thread.NORM_PRIORITY);
+            }
             try {
                 P1 = Integer.parseInt(P1S.substring(0, P1S.length() - 1));
                 N1 = Integer.parseInt(periodOfOrdinary.getText());
@@ -257,6 +323,7 @@ public class ControlPanel extends JPanel {
             if(error){
                 dialogError.setVisible(true);
             }
+
             frame.configureHabitat(new Habitat(N1,N2,P1, K ,frame, livingTimeOrdinaryI, livingTimeAlbinosI));
             dialog.setVisible(false);
 
@@ -266,7 +333,7 @@ public class ControlPanel extends JPanel {
             controller.stopCreateProcess();
             objectsFrame.update();
             objectsFrame.setVisible(true);
-            controller.startBornProcess();
+            controller.startCreateProcess();
         });
     }
 
@@ -282,6 +349,10 @@ public class ControlPanel extends JPanel {
     public void configureLists(HashMap<String, String> timeList, TreeSet<String> idList) {
         this.timeList = timeList;
         this.idList = idList;
+    }
+    public void configureThreads(AlbinosRabbitAI albinosAI, OrdinaryRabbitAI ordinaryAI) {
+        this.albinosAI = albinosAI;
+        this.ordinaryAI = ordinaryAI;
     }
     public void disableStartButton(){
         this.startButton.setEnabled(false);

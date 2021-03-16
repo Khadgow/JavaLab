@@ -22,6 +22,9 @@ public class MyField extends JPanel {
         this.rabbits = rabbits;
         repaint();
     }
+    public void paintWithoutRabbits(){
+        repaint();
+    }
 
     @Override
     public void paint(Graphics g) {

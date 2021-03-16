@@ -32,11 +32,11 @@ public class Controller {
         refreshRabbitPopulation();
     }
 
-    public void startBornProcess() {
+    public void startCreateProcess() {
         habitat.startCreate();
     }
 
-    public boolean isBornProcessOn() {
+    public boolean isCreateProcessOn() {
         return habitat.isCreateProcessOn();
     }
 
@@ -62,5 +62,9 @@ public class Controller {
 
     public void configurateHabitat(Habitat habitat) {
         this.habitat = habitat;
+    }
+
+    public MyField getM() {
+        return m;
     }
 }

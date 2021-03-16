@@ -18,7 +18,7 @@ public class MyFrame extends JFrame implements KeyListener {
     final private int controlPanelSize = 200;
 
     public MyFrame() {
-        habitat = new Habitat(1, 2, 100, 50, this, 5, 5);
+        habitat = new Habitat(1, 2, 100, 50, this, 50, 50);
         myField = new MyField();
         controller = new Controller(myField, habitat, this);
         habitat.confifureController(controller);
@@ -26,7 +26,7 @@ public class MyFrame extends JFrame implements KeyListener {
         controlPanel = new ControlPanel();
         controlPanel.configureController(controller);
         controlPanel.configureLists(habitat.getTimeList(), habitat.getIdList());
-
+        controlPanel.configureThreads(habitat.getAlbinosAI(), habitat.getOrdinaryAI());
         setTitle("Rabbits");
         setPreferredSize(new Dimension(habitat.getWidth() + controlPanelSize, habitat.getHeight()));
         setLayout(new BorderLayout());
@@ -57,13 +57,13 @@ public class MyFrame extends JFrame implements KeyListener {
     public void keyTyped(KeyEvent keyEvent) {
         switch (keyEvent.getKeyChar()) {
             case 'b':
-                if (!controller.isBornProcessOn()) {
-                    controller.startBornProcess();
+                if (!controller.isCreateProcessOn()) {
+                    controller.startCreateProcess();
                     controlPanel.disableStartButton();
                 }
                 break;
             case 'e':
-                if (controller.isBornProcessOn()) {
+                if (controller.isCreateProcessOn()) {
                     controller.stopCreateProcess();
                     controlPanel.disableStopButton();
                 }
@@ -92,10 +92,10 @@ public class MyFrame extends JFrame implements KeyListener {
     }
 
     public void showFinishDialog() {
-        JDialog dialog = new JDialog(this, "Born process is finished", true);
+        JDialog dialog = new JDialog(this, "Create process is finished", true);
         JPanel panel = new JPanel(new GridLayout(7, 1));
 
-        JLabel messageLabel = createLabel("Born process is finished. Here are results: ",
+        JLabel messageLabel = createLabel("Create process is finished. Here are results: ",
                 SwingConstants.CENTER,
                 new Font("Serif", Font.BOLD, 16),
                 Color.BLACK);
@@ -136,7 +136,7 @@ public class MyFrame extends JFrame implements KeyListener {
 
         cancelButton.addActionListener(listener -> {
             controlPanel.disableStartButton();
-            controller.startBornProcess();
+            controller.startCreateProcess();
             dialog.setVisible(false);
         });
         okButton.addActionListener(listener -> {
