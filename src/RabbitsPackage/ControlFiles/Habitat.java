@@ -15,7 +15,7 @@ public class Habitat {
     final private int WIDTH = 600;
     final private int HEIGHT = 600;
     private MyFrame myframe;
-    private Vector<Rabbit> rabbitsList = new Vector<>();
+    private volatile Vector<Rabbit> rabbitsList = new Vector<>();
     private Timer timer = new Timer();
     private boolean createProcessOn = false;
     CreateProcess createProcess = new CreateProcess(this);
@@ -25,6 +25,7 @@ public class Habitat {
     private OrdinaryRabbitAI ordinaryAI;
     private TreeSet<String> idList = new TreeSet<>();
     private HashMap<String,String> timeList = new HashMap<>();
+    public int totalTime;
 
     public  Habitat(int N1, int N2, int P1, double K, MyFrame myframe, int livingTimeOrdinary, int livingTimeAlbinos) {
         this.N1 = N1;
@@ -63,8 +64,7 @@ public class Habitat {
 
         controller.passTime(time);
 
-
-
+        totalTime = time;
 
         Vector<String> removeId = new Vector<>();
         Iterator<String> iter = idList.iterator();
@@ -126,7 +126,12 @@ public class Habitat {
     public void startCreate() {
         createProcessOn = true;
         timer.schedule(createProcess, 0, 100);
-
+        ordinaryAI = new OrdinaryRabbitAI(rabbitsList, createProcess, controller);
+        ordinaryAI.continue_();
+        ordinaryAI.start();
+        albinosAI = new AlbinosRabbitAI(rabbitsList, createProcess);
+        albinosAI.continue_();
+        albinosAI.start();
     }
 
     public void stopCreate() {
@@ -155,16 +160,41 @@ public class Habitat {
     public void confifureController(Controller controller) {
         this.controller = controller;
         createProcess = new CreateProcess(this, controller.getM());
-        ordinaryAI = new OrdinaryRabbitAI(rabbitsList, createProcess, controller);
-        ordinaryAI.continue_();
-        ordinaryAI.start();
-        albinosAI = new AlbinosRabbitAI(rabbitsList, createProcess);
-        albinosAI.continue_();
-        albinosAI.start();
     }
     public void switchAI(){
         ordinaryAI.changeState();
         albinosAI.changeState();
+    }
+    public void changeSettings(String[] newSettings){
+        this.P1 = Integer.parseInt(newSettings[0]);
+        this.N1 = Integer.parseInt(newSettings[1]);
+        this.N2 = Integer.parseInt(newSettings[2]);
+        this.K = Double.parseDouble(newSettings[3]);
+        this.livingTimeOrdinary = Integer.parseInt(newSettings[4]);
+        this.livingTimeAlbinos = Integer.parseInt(newSettings[5]);
+        if(newSettings[6].equals("High")){
+            ordinaryAI.setPriority(Thread.MAX_PRIORITY);
+        } else if (newSettings[6].equals("Low")) {
+            ordinaryAI.setPriority(Thread.MIN_PRIORITY);
+        } else {
+            ordinaryAI.setPriority(Thread.NORM_PRIORITY);
+        }
+        if(newSettings[7].equals("High")){
+            albinosAI.setPriority(Thread.MAX_PRIORITY);
+        } else if (newSettings[7].equals("Low")) {
+            albinosAI.setPriority(Thread.MIN_PRIORITY);
+        } else {
+            albinosAI.setPriority(Thread.NORM_PRIORITY);
+        }
+    }
+
+    public void changeSettings(int P1, int N1, int N2, double K, int livingTimeOrdinary, int livingTimeAlbinos){
+        this.P1 = P1;
+        this.N1 = N1;
+        this.N2 = N2;
+        this.K = K;
+        this.livingTimeOrdinary = livingTimeOrdinary;
+        this.livingTimeAlbinos = livingTimeAlbinos;
     }
 
     public boolean isCreateProcessOn() {
@@ -175,6 +205,9 @@ public class Habitat {
     }
     public TreeSet<String> getIdList() {
         return idList;
+    }
+    public Vector<Rabbit> getRabbitsList() {
+        return rabbitsList;
     }
     public AlbinosRabbitAI getAlbinosAI() { return albinosAI; }
     public OrdinaryRabbitAI getOrdinaryAI() { return ordinaryAI; }

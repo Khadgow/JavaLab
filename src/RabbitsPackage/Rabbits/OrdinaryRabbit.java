@@ -4,8 +4,9 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 
-public class OrdinaryRabbit extends Rabbit {
+public class OrdinaryRabbit extends Rabbit implements Serializable {
     public static int numberOfOrdinary = 0;
     static public Image image;
 

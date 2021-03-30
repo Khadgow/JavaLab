@@ -4,17 +4,24 @@ import RabbitsPackage.ControlFiles.Controller;
 import RabbitsPackage.ControlFiles.Habitat;
 import RabbitsPackage.Rabbits.AlbinosRabbitAI;
 import RabbitsPackage.Rabbits.OrdinaryRabbitAI;
+import RabbitsPackage.Rabbits.Rabbit;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 public class ControlPanel extends JPanel {
+    Habitat habitat;
     JPanel buttonsStartStopPanel;
     ButtonGroup  buttonsShowHideGroup;
     JPanel  buttonsShowHidePanel;
@@ -29,6 +36,8 @@ public class ControlPanel extends JPanel {
     JButton saveButton;
     JButton startStopMoveOrdinary;
     JButton startStopMoveAlbinos;
+    JButton saveObjectsButton;
+    JButton loadObjectsButton;
     JRadioButton showTimeButton;
     JRadioButton hideTimeButton;
     JDialog dialog;
@@ -50,6 +59,7 @@ public class ControlPanel extends JPanel {
 
     HashMap<String,String> timeList;
     TreeSet<String> idList;
+    Vector<Rabbit> rabbitList;
     ControlPanel() {
         super();
         setLayout(new GridLayout(3, 1));
@@ -61,7 +71,7 @@ public class ControlPanel extends JPanel {
         buttonsStartStopPanel = new JPanel(new GridLayout(2, 1));
         buttonsShowHideGroup  = new ButtonGroup ();
         buttonsShowHidePanel = new JPanel(new GridLayout(2, 1));
-        buttonsLast = new JPanel(new GridLayout(5, 1));
+        buttonsLast = new JPanel(new GridLayout(7, 1));
         buttonsStartStopPanel.setPreferredSize(new Dimension(200, 200));
         buttonsStartStopPanel.setBackground(Color.decode("#E6E6FA"));
         dialog = new JDialog(frame, "Settings", true);
@@ -77,6 +87,8 @@ public class ControlPanel extends JPanel {
         showObjectsButton = new JButton("Show objects");
         startStopMoveOrdinary = new JButton("Stop ordinary move");
         startStopMoveAlbinos = new JButton("Stop albinos move");
+        saveObjectsButton = new JButton("Save objects");
+        loadObjectsButton = new JButton("Load objects");
         periodOfOrdinary = new JTextField("1");
         periodOfAlbinos = new JTextField("2");
         percentOfAlbinos = new JTextField("50");
@@ -104,6 +116,8 @@ public class ControlPanel extends JPanel {
         showObjectsButton.setFocusable(false);
         startStopMoveOrdinary.setFocusable(false);
         startStopMoveAlbinos.setFocusable(false);
+        saveObjectsButton.setFocusable(false);
+        loadObjectsButton.setFocusable(false);
 
         buttonsStartStopPanel.add(startButton);
         buttonsStartStopPanel.add(stopButton);
@@ -116,6 +130,8 @@ public class ControlPanel extends JPanel {
         buttonsLast.add(showObjectsButton);
         buttonsLast.add(startStopMoveOrdinary);
         buttonsLast.add(startStopMoveAlbinos);
+        buttonsLast.add(saveObjectsButton);
+        buttonsLast.add(loadObjectsButton);
         for (int i = 10; i<=100; i+=10){
             chanceOfOrdinary.addItem(i+"%");
         }
@@ -217,11 +233,17 @@ public class ControlPanel extends JPanel {
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
             controller.startCreateProcess();
+            this.ordinaryAI = habitat.getOrdinaryAI();
+            this.albinosAI = habitat.getAlbinosAI();
+
+
         });
         stopButton.addActionListener(listener -> {
             stopButton.setEnabled(false);
             startButton.setEnabled(true);
             controller.stopCreateProcess();
+            albinosAI.pause();
+            ordinaryAI.pause();
         });
 
         showTimeButton.addActionListener(listener -> {
@@ -243,9 +265,9 @@ public class ControlPanel extends JPanel {
         startStopMoveAlbinos.addActionListener(listener -> {
             albinosAI.changeState();
             if(albinosAI.isRunning()){
-                startStopMoveAlbinos.setText("Stop ordinary move");
+                startStopMoveAlbinos.setText("Stop albinos move");
             } else {
-                startStopMoveAlbinos.setText("Continue ordinary move");
+                startStopMoveAlbinos.setText("Continue albinos move");
             }
         });
         showInfoButton.addActionListener(listener -> {
@@ -257,6 +279,12 @@ public class ControlPanel extends JPanel {
         });
         settingsButton.addActionListener(listener -> {
             dialog.setVisible(true);
+        });
+        saveObjectsButton.addActionListener(listener -> {
+            writeDat("config/objects.dat");
+        });
+        loadObjectsButton.addActionListener(listener -> {
+            readDat("config/objects.dat");
         });
         saveButton.addActionListener(listener -> {
             controller.stopCreateProcessFinally();
@@ -323,8 +351,7 @@ public class ControlPanel extends JPanel {
             if(error){
                 dialogError.setVisible(true);
             }
-
-            frame.configureHabitat(new Habitat(N1,N2,P1, K ,frame, livingTimeOrdinaryI, livingTimeAlbinosI));
+            habitat.changeSettings(P1, N1, N2, K, livingTimeOrdinaryI, livingTimeAlbinosI);
             dialog.setVisible(false);
 
         });
@@ -350,9 +377,49 @@ public class ControlPanel extends JPanel {
         this.timeList = timeList;
         this.idList = idList;
     }
+    public void configureHabitat(Habitat habitat) {
+        this.habitat = habitat;
+        this.ordinaryAI = habitat.getOrdinaryAI();
+        this.albinosAI = habitat.getAlbinosAI();
+    }
     public void configureThreads(AlbinosRabbitAI albinosAI, OrdinaryRabbitAI ordinaryAI) {
         this.albinosAI = albinosAI;
         this.ordinaryAI = ordinaryAI;
+    }
+    private void writeDat(String fileName) {
+        ObjectOutputStream oos;
+        rabbitList = habitat.getRabbitsList();
+        try {
+            oos = new ObjectOutputStream(new FileOutputStream(fileName, false));
+            for (Rabbit rabbit : rabbitList) {
+                System.out.println(rabbit.id);
+            }
+            oos.writeObject(rabbitList);
+            oos.close();
+        }
+        catch(Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    private void readDat(String fileName) {
+        ObjectInputStream ois;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(fileName));
+            rabbitList.clear();
+            timeList.clear();
+            idList.clear();
+            Vector<Rabbit> newArr = (Vector<Rabbit>) ois.readObject();
+            rabbitList = (Vector<Rabbit>) ois.readObject();
+
+            for (Rabbit rabbit : rabbitList) {
+                idList.add(Integer.toString(rabbit.id));
+                timeList.put(Integer.toString(rabbit.id), Integer.toString(habitat.totalTime));
+            }
+            ois.close();
+        }
+        catch(Exception ex){
+            System.out.println(ex.getMessage());
+        }
     }
     public void disableStartButton(){
         this.startButton.setEnabled(false);
@@ -397,5 +464,28 @@ public class ControlPanel extends JPanel {
 
     public String getOrdinaryAIPriority() {
         return ordinaryAIPriority.getSelectedItem().toString();
+    }
+
+    public void setNewConfig(String [] newConfig){
+        periodOfOrdinary.setText(newConfig[1]);
+        periodOfAlbinos.setText(newConfig[2]);
+        percentOfAlbinos.setText(newConfig[3]);
+        livingTimeOrdinary.setText(newConfig[4]);
+        livingTimeAlbinos.setText(newConfig[5]);
+        chanceOfOrdinary.setSelectedIndex(newConfig[0].charAt(0)-1);
+        if(newConfig[6].equals("High")){
+            ordinaryAIPriority.setSelectedIndex(0);
+        } else if (newConfig[6].equals("Low")) {
+            ordinaryAIPriority.setSelectedIndex(1);
+        } else {
+            ordinaryAIPriority.setSelectedIndex(2);
+        }
+        if(newConfig[7].equals("High")){
+            albinosAIPriority.setSelectedIndex(0);
+        } else if (newConfig[7].equals("Low")) {
+            albinosAIPriority.setSelectedIndex(1);
+        } else {
+            albinosAIPriority.setSelectedIndex(2);
+        }
     }
 }

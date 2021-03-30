@@ -9,9 +9,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 public class MyFrame extends JFrame implements KeyListener {
     Habitat habitat;
@@ -31,8 +29,8 @@ public class MyFrame extends JFrame implements KeyListener {
         myField.configureController(controller);
         controlPanel = new ControlPanel();
         controlPanel.configureController(controller);
+        controlPanel.configureHabitat(habitat);
         controlPanel.configureLists(habitat.getTimeList(), habitat.getIdList());
-        controlPanel.configureThreads(habitat.getAlbinosAI(), habitat.getOrdinaryAI());
         setTitle("Rabbits");
         setPreferredSize(new Dimension(habitat.getWidth() + controlPanelSize, habitat.getHeight()));
         setLayout(new BorderLayout());
@@ -78,6 +76,27 @@ public class MyFrame extends JFrame implements KeyListener {
         conf += controlPanel.getAlbinosAIPriority() + '\n';
         fos.write(conf.getBytes());
         fos.close();
+    }
+
+    private void readConf(String fileName) throws IOException {
+        BufferedInputStream is = new BufferedInputStream(new FileInputStream(fileName), 200);
+        int ch;
+        String line = "";
+        int id = 0;
+        String[] configArray = new String[8];
+        while((ch = is.read()) != -1) {
+            if (!String.valueOf((char)ch).equals("\n")) {
+                line += String.valueOf((char)ch);
+            } else {
+                configArray[id] = line;
+                line = "";
+                id++;
+            }
+        }
+        is.close();
+        habitat.changeSettings(configArray);
+        controlPanel.setNewConfig(configArray);
+
     }
 
     public void updateTime(int time) {

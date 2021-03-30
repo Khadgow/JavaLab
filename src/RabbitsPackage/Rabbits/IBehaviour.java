@@ -1,6 +1,6 @@
 package RabbitsPackage.Rabbits;
 
-public interface IBehaviour {
+public interface IBehaviour  {
     void move(int x, int y);
     int getX();
     int getY();

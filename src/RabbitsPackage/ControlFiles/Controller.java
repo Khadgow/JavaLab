@@ -9,7 +9,6 @@ import AppletModules.MyFrame;
 import java.util.ArrayList;
 import java.util.Vector;
 
-//Controller - реалезует различные методы для field, habitat, frame
 public class Controller {
     private MyField m;
     private Habitat habitat;

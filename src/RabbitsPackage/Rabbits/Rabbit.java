@@ -1,6 +1,8 @@
 package RabbitsPackage.Rabbits;
 
-public abstract class Rabbit implements IBehaviour {
+import java.io.Serializable;
+
+public abstract class Rabbit implements IBehaviour, Serializable {
     private int x;
     private int y;
     public int id;

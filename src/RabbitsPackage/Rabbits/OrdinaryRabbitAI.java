@@ -60,27 +60,3 @@ public class OrdinaryRabbitAI  extends BaseAI{
     }
 }
 
-//while (going) {
-//synchronized (rabbits) {
-//int time = process.getTime();
-//                for (int i = 0; i < rabbits.size(); i++) {
-//                    Rabbit rabbit = rabbits.get(i);
-//                    if (rabbit instanceof OrdinaryRabbit) {
-//                        if (Math.random() < 0.5) {
-//                            directionX = 1;
-//                        } else {
-//                            directionX = -1;
-//                        }
-//                        if (Math.random() < 0.5) {
-//                            directionY = 1;
-//                        } else {
-//                            directionY = -1;
-//                        }
-//                        int x = rabbit.getX();
-//                        int y = rabbit.getY();
-//                        rabbit.setX(x + (dx * directionX));
-//                        rabbit.setY(y + (dy * directionY));
-//                    }
-//                }
-//}
-//       }
