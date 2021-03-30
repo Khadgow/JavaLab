@@ -45,18 +45,3 @@ public class AlbinosRabbitAI extends BaseAI{
         }
     }
 }
-//        while (going) {
-//synchronized (rabbits) {
-
-//                int time = process.getTime();
-//                for (int i = 0; i < rabbits.size(); i++) {
-//                    Rabbit rabbit = rabbits.get(i);
-//                    if (rabbit instanceof AlbinosRabbit) {
-//                        int x = rabbit.getX();
-//                        int y = rabbit.getY();
-//                        rabbit.setX((int) (x + radius * Math.cos(speed * time)));
-//                        rabbit.setY((int) (y + radius * Math.sin(speed * time)));
-//                    }
-//                }
-//            }
-//        }

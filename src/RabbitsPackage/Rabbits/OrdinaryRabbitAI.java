@@ -22,7 +22,7 @@ public class OrdinaryRabbitAI  extends BaseAI{
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 int time = process.getMilTime();
-                if(time % 10 == 0){
+                if(time % 5 == 0){
                     if (Math.random() < 0.5) {
                         directionX = 1;
                     } else {
@@ -39,22 +39,6 @@ public class OrdinaryRabbitAI  extends BaseAI{
                     int y = rabbit.getY();
                     rabbit.setX(x + (dx * directionX));
                     rabbit.setY(y + (dy * directionY));
-//                    if (rabbit instanceof OrdinaryRabbit) {
-//                        if (Math.random() < 0.5) {
-//                            directionX = 1;
-//                        } else {
-//                            directionX = -1;
-//                        }
-//                        if (Math.random() < 0.5) {
-//                            directionY = 1;
-//                        } else {
-//                            directionY = -1;
-//                        }
-//                        int x = rabbit.getX();
-//                        int y = rabbit.getY();
-//                        rabbit.setX(x + (dx * directionX));
-//                        rabbit.setY(y + (dy * directionY));
-//                    }
                 }
                 Thread.sleep(100);
             } catch (InterruptedException e) {

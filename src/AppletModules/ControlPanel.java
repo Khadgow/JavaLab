@@ -45,6 +45,8 @@ public class ControlPanel extends JPanel {
     MyFrame frame;
     AlbinosRabbitAI albinosAI;
     OrdinaryRabbitAI ordinaryAI;
+    int P1 = 100, N1 = 1,N2 = 2, livingTimeOrdinaryI = 5, livingTimeAlbinosI = 5;
+    double K = 50;
 
     HashMap<String,String> timeList;
     TreeSet<String> idList;
@@ -259,8 +261,6 @@ public class ControlPanel extends JPanel {
         saveButton.addActionListener(listener -> {
             controller.stopCreateProcessFinally();
             boolean error = false;
-            int P1 = 100, N1 = 1,N2 = 2, livingTimeOrdinaryI = 5, livingTimeAlbinosI = 5;
-            double K = 50;
             disableStopButton();
             String P1S = chanceOfOrdinary.getSelectedItem().toString();
             if(ordinaryAIPriority.getSelectedItem().toString().equals("High")){
@@ -369,5 +369,33 @@ public class ControlPanel extends JPanel {
     public void disableHideButton(){
         this.showTimeButton.setSelected(true);
         this.hideTimeButton.setSelected(false);
+    }
+    public int getP1 (){
+        return P1;
+    }
+    public int getN1 (){
+        return N1;
+    }
+    public int getN2 (){
+        return N2;
+    }
+
+    public double getK(){
+        return K;
+    }
+
+    public int getLivingTimeOrdinaryI (){
+        return livingTimeOrdinaryI;
+    }
+    public int getLivingTimeAlbinosI (){
+        return livingTimeAlbinosI;
+    }
+
+    public String getAlbinosAIPriority() {
+        return albinosAIPriority.getSelectedItem().toString();
+    }
+
+    public String getOrdinaryAIPriority() {
+        return ordinaryAIPriority.getSelectedItem().toString();
     }
 }

@@ -7,6 +7,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MyFrame extends JFrame implements KeyListener {
     Habitat habitat;
@@ -16,6 +21,7 @@ public class MyFrame extends JFrame implements KeyListener {
     JLabel timeLabel;
     int time;
     final private int controlPanelSize = 200;
+    final private String confFile = "config/config.txt";
 
     public MyFrame() {
         habitat = new Habitat(1, 2, 100, 50, this, 50, 50);
@@ -45,6 +51,33 @@ public class MyFrame extends JFrame implements KeyListener {
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(true);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.out.println("closed");
+                try {
+                    writeConfig(confFile);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+    }
+
+    private void writeConfig(String fileName) throws IOException {
+        FileOutputStream fos = new FileOutputStream(new File(fileName));
+        String conf = String.valueOf(controlPanel.getP1()) + '\n';
+        conf += String.valueOf(controlPanel.getN1()) + '\n';
+        conf += String.valueOf(controlPanel.getN2()) + '\n';
+        conf += String.valueOf(controlPanel.getK()) + '\n';
+        conf += String.valueOf(controlPanel.getLivingTimeOrdinaryI()) + '\n';
+        conf += String.valueOf(controlPanel.getLivingTimeAlbinosI()) + '\n';
+        conf += controlPanel.getOrdinaryAIPriority() + '\n';
+        conf += controlPanel.getAlbinosAIPriority() + '\n';
+        fos.write(conf.getBytes());
+        fos.close();
     }
 
     public void updateTime(int time) {
@@ -87,11 +120,12 @@ public class MyFrame extends JFrame implements KeyListener {
     public void configureHabitat(Habitat habitat) {
         this.habitat = habitat;
         habitat.confifureController(controller);
-        controller.configurateHabitat(habitat);
+        controller.configurateHabitat(this.habitat);
         controlPanel.configureLists(habitat.getTimeList(), habitat.getIdList());
     }
 
     public void showFinishDialog() {
+        //habitat.switchAI();
         JDialog dialog = new JDialog(this, "Create process is finished", true);
         JPanel panel = new JPanel(new GridLayout(7, 1));
 
@@ -151,6 +185,7 @@ public class MyFrame extends JFrame implements KeyListener {
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
+       // habitat.switchAI();
     }
 
     @Override
@@ -165,5 +200,6 @@ public class MyFrame extends JFrame implements KeyListener {
         label.setForeground(fontColor);
         return label;
     }
+
 
 }

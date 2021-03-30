@@ -162,6 +162,10 @@ public class Habitat {
         albinosAI.continue_();
         albinosAI.start();
     }
+    public void switchAI(){
+        ordinaryAI.changeState();
+        albinosAI.changeState();
+    }
 
     public boolean isCreateProcessOn() {
         return createProcessOn;
