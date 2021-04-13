@@ -360,6 +360,7 @@ public class ControlPanel extends JPanel {
                 dialogError.setVisible(true);
             }
             habitat.changeSettings(P1, N1, N2, K, livingTimeOrdinaryI, livingTimeAlbinosI);
+            frame.setSettings(P1, N1, N2, K, livingTimeOrdinaryI, livingTimeAlbinosI);
             dialog.setVisible(false);
 
         });

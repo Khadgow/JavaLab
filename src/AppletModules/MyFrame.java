@@ -10,6 +10,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.StringJoiner;
 
 public class MyFrame extends JFrame implements KeyListener {
     Habitat habitat;
@@ -20,6 +23,16 @@ public class MyFrame extends JFrame implements KeyListener {
     int time;
     final private int controlPanelSize = 200;
     final private String confFile = "config/config.txt";
+    //------------------------------------------------------------------------
+    private String host = "localhost";
+    private String name;
+    private int port = 3000;
+    private Socket sock;
+    private DataOutputStream outStream;
+    private DataInputStream inStream;
+    public static LinkedList<String> hostList = new LinkedList<String>();
+    String[] settings;
+    private boolean CONNECTED = false;
 
     public MyFrame() {
         habitat = new Habitat(1, 2, 100, 50, this, 50, 50);
@@ -49,6 +62,8 @@ public class MyFrame extends JFrame implements KeyListener {
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(true);
+        //connect();
+        new NameDialog();
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -100,6 +115,7 @@ public class MyFrame extends JFrame implements KeyListener {
         is.close();
         habitat.changeSettings(configArray);
         controlPanel.setNewConfig(configArray);
+        settings = configArray;
 
     }
 
@@ -126,12 +142,13 @@ public class MyFrame extends JFrame implements KeyListener {
                 showFinishDialog();
                 break;
             case 't':
-                if(timeLabel.isVisible()){
-                    controlPanel.disableShowButton();
-                } else {
-                    controlPanel.disableHideButton();
-                }
-                timeLabel.setVisible(!timeLabel.isVisible());
+//                if(timeLabel.isVisible()){
+//                    controlPanel.disableShowButton();
+//                } else {
+//                    controlPanel.disableHideButton();
+//                }
+//                timeLabel.setVisible(!timeLabel.isVisible());
+                new NetworkDialog();
                 break;
         }
     }
@@ -148,7 +165,6 @@ public class MyFrame extends JFrame implements KeyListener {
     }
 
     public void showFinishDialog() {
-        //habitat.switchAI();
         JDialog dialog = new JDialog(this, "Create process is finished", true);
         JPanel panel = new JPanel(new GridLayout(7, 1));
 
@@ -208,7 +224,6 @@ public class MyFrame extends JFrame implements KeyListener {
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
-       // habitat.switchAI();
     }
 
     @Override
@@ -224,5 +239,215 @@ public class MyFrame extends JFrame implements KeyListener {
         return label;
     }
 
+
+
+    //----------------------------------------------
+    //----------------------------------------------
+    //----------------------------------------------
+
+    private void connect() {
+        try {
+            sock = new Socket(host, port);
+            outStream = new DataOutputStream(sock.getOutputStream());
+            inStream = new DataInputStream(sock.getInputStream());
+            CONNECTED = true;
+        } catch (IOException e) {
+            System.exit(-5);
+        }
+    }
+
+    private void disconnect() {
+        try {
+            outStream.close();
+            inStream.close();
+            CONNECTED = false;
+        } catch (IOException e) {
+        } catch (Exception ex) {
+            System.exit(-5);
+        }
+    }
+
+
+
+
+    private class NameDialog extends JDialog {
+        private JButton buttonOK;
+        private int DIALOG_WIDTH = 200;
+        private int DIALOG_HEIGHT = 100;
+
+        public NameDialog() {
+            setTitle("WELCOME");
+            setModal(true);
+            setAlwaysOnTop(true);
+            setBounds(
+                    habitat.getWidth() / 2 - DIALOG_WIDTH / 2,
+                    habitat.getHeight() / 2 - DIALOG_HEIGHT / 2,
+                    DIALOG_WIDTH,
+                    DIALOG_HEIGHT
+            );
+            setLayout(new BorderLayout());
+
+            JLabel label = new JLabel("Name: ");
+            JTextField nameField = new JTextField();
+            nameField.addActionListener(ae -> {
+                name = nameField.getText();
+                System.out.println(name);
+                try {
+                    outStream.writeUTF(name);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                NameDialog.this.dispose();
+            });
+
+            buttonOK = new JButton("OK");
+            add(label, BorderLayout.NORTH);
+            add(buttonOK, BorderLayout.SOUTH);
+            buttonOK.addActionListener(actionEvent -> {
+                name = nameField.getText();
+                System.out.println(name);
+                NameDialog.this.dispose();
+            });
+            add(nameField, BorderLayout.CENTER);
+            setVisible(true);
+        }
+    }
+
+    private class NetworkDialog extends JDialog {
+        private JTextField textField;
+        private JButton buttonSEND;
+        private JButton buttonDISCONNECT;
+        private int DIALOG_WIDTH = 200;
+        private int DIALOG_HEIGHT = 100;
+        private String target = "";
+
+        public NetworkDialog() {
+            setTitle("NETWORK (" + name + ")");
+            setAlwaysOnTop(true);
+            setModal(false);
+            setBounds(
+                    habitat.getWidth() / 2 - DIALOG_WIDTH / 2,
+                    habitat.getHeight() / 2 - DIALOG_HEIGHT / 2,
+                    DIALOG_WIDTH,
+                    DIALOG_HEIGHT
+            );
+            setLayout(new BorderLayout());
+            setBackground(new Color(222,222,222));
+
+            JComboBox hosts = new JComboBox();
+            hosts.setFocusable(false);
+            connect();
+
+            try {
+                outStream.writeUTF(name);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Thread thread = new Thread(() -> {
+                try {
+                    while (true) {
+                        int action = inStream.readInt();
+                        switch (action) {
+                            case 0:
+                                hostList.clear();
+                                hosts.removeAllItems();
+                                int size = inStream.readInt();
+                                for (int i = 0; i < size; i++) {
+                                    hostList.addLast(inStream.readUTF());
+                                    hosts.addItem(hostList.get(i));
+                                    System.out.println(hostList.get(i));
+                                }
+                                hosts.addItemListener(e -> {
+                                    System.out.println(e.getItem());
+                                    target = e.getItem().toString();
+                                });
+                                if (size > 0)
+                                    hosts.setSelectedIndex(0);
+                                if (size == 1) {
+                                    target = hosts.getItemAt(0).toString();
+                                }
+                                break;
+                            case 1:
+                                String data = inStream.readUTF();
+                                System.out.println("Arrive");
+                                System.out.println("k to set: " + data);
+                                String[] dataArr = data.split(" ");
+//                                Window.this.habitat.setK(data / 100.0);
+//                                controlPanel.getSliderPanel().getSliderK().setValue(data);
+//                                controlPanel.getComboBoxListPanel().getListK().setSelectedIndex((int) (controlPanel.getSliderPanel().getSliderK().getValue()
+//                                        / 10.0));
+                                habitat.changeSettings(dataArr);
+                                controlPanel.setNewConfig(dataArr);
+                                settings = dataArr;
+                                break;
+                        }
+                    }
+
+                } catch (Exception e) {
+                    System.err.println(e);
+                }
+            });
+            thread.setDaemon(true);
+            thread.setName("Client updater");
+            thread.start();
+
+            buttonSEND = new JButton("Send");
+            buttonSEND.addActionListener(actionEvent -> {
+                StringJoiner joiner = new StringJoiner(" ");
+                for (String set : settings){
+                    joiner.add(set);
+                }
+                String data = joiner.toString();
+                if (!target.equals("")) {
+                    try {
+                        System.out.println(target);
+                        System.out.println(data);
+                        outStream.writeInt(1);
+                        outStream.writeUTF(target);
+                        outStream.writeUTF(data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            buttonDISCONNECT = new JButton("Disconnect");
+            buttonDISCONNECT.addActionListener(actionEvent -> {
+                try {
+                    outStream.writeInt(2);
+                    thread.interrupt();
+                    disconnect();
+                    NetworkDialog.this.dispose();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            JPanel hostPanel = new JPanel(new BorderLayout());
+            hostPanel.add(new JLabel("Clients:"), BorderLayout.NORTH);
+            hostPanel.add(hosts, BorderLayout.SOUTH);
+
+
+            JPanel bp = new JPanel(new BorderLayout());
+            bp.add(buttonSEND, BorderLayout.EAST);
+            bp.add(buttonDISCONNECT, BorderLayout.WEST);
+
+            add(hostPanel, BorderLayout.WEST);
+
+            add(bp, BorderLayout.SOUTH);
+
+            setVisible(true);
+        }
+    }
+    public void setSettings(int P1, int N1, int N2, double K, int livingTimeOrdinary, int livingTimeAlbinos){
+        //settings = new String[8];
+        settings[0] = String.valueOf(P1);
+        settings[1] = String.valueOf(N1);
+        settings[2] = String.valueOf(N2);
+        settings[3] = String.valueOf(K);
+        settings[4] = String.valueOf(livingTimeOrdinary);
+        settings[5] = String.valueOf(livingTimeAlbinos);
+
+    }
 
 }
