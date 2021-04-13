@@ -39,18 +39,6 @@ public class Controller {
         return habitat.isCreateProcessOn();
     }
 
-    public int getOrdinaryRabbitsAmount() {
-        return OrdinaryRabbit.numberOfOrdinary;
-    }
-
-    public int getAlbinosRabbitsAmount() {
-        return AlbinosRabbit.numberOfAlbinos;
-    }
-
-    public int getAllRabbitsCount() {
-        return Rabbit.countAllRabbits;
-    }
-
     public void refreshRabbitPopulation() {
         habitat.refreshRabbitPopulation();
     }

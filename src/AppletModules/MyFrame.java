@@ -61,7 +61,11 @@ public class MyFrame extends JFrame implements KeyListener {
                 }
             }
         });
-
+        try {
+            readConf(confFile);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void writeConfig(String fileName) throws IOException {
@@ -153,17 +157,17 @@ public class MyFrame extends JFrame implements KeyListener {
                 new Font("Serif", Font.BOLD, 16),
                 Color.BLACK);
 
-        JLabel ordinaryRabbitsLabel = createLabel("Ordinary: " + controller.getOrdinaryRabbitsAmount(),
+        JLabel ordinaryRabbitsLabel = createLabel("Ordinary: " + habitat.numberOfOrdinary,
                 SwingConstants.CENTER,
                 new Font("Courier New", Font.ITALIC, 16),
                 Color.decode("#531C1C"));
 
-        JLabel albinosRabbitsLabel = createLabel("Albinos: " + controller.getAlbinosRabbitsAmount(),
+        JLabel albinosRabbitsLabel = createLabel("Albinos: " + habitat.numberOfAlbinos,
                 SwingConstants.CENTER,
                 new Font("Times New Roman", Font.BOLD, 16),
                 Color.decode("#32527b"));
 
-        JLabel allRabbitsCount = createLabel("All rabbits: " + controller.getAllRabbitsCount(),
+        JLabel allRabbitsCount = createLabel("All rabbits: " + habitat.countAllRabbits,
                 SwingConstants.CENTER,
                 new Font("Roboto", Font.ITALIC, 16),
                 Color.blue);

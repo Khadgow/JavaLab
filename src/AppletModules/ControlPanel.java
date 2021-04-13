@@ -10,10 +10,7 @@ import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -38,6 +35,7 @@ public class ControlPanel extends JPanel {
     JButton startStopMoveAlbinos;
     JButton saveObjectsButton;
     JButton loadObjectsButton;
+    JButton consoleButton;
     JRadioButton showTimeButton;
     JRadioButton hideTimeButton;
     JDialog dialog;
@@ -54,12 +52,14 @@ public class ControlPanel extends JPanel {
     MyFrame frame;
     AlbinosRabbitAI albinosAI;
     OrdinaryRabbitAI ordinaryAI;
+    Console console;
     int P1 = 100, N1 = 1,N2 = 2, livingTimeOrdinaryI = 5, livingTimeAlbinosI = 5;
     double K = 50;
+    private File file = new File("serialized.dat");
 
     HashMap<String,String> timeList;
     TreeSet<String> idList;
-    Vector<Rabbit> rabbitList;
+    volatile Vector<Rabbit> rabbitList;
     ControlPanel() {
         super();
         setLayout(new GridLayout(3, 1));
@@ -71,7 +71,7 @@ public class ControlPanel extends JPanel {
         buttonsStartStopPanel = new JPanel(new GridLayout(2, 1));
         buttonsShowHideGroup  = new ButtonGroup ();
         buttonsShowHidePanel = new JPanel(new GridLayout(2, 1));
-        buttonsLast = new JPanel(new GridLayout(7, 1));
+        buttonsLast = new JPanel(new GridLayout(8, 1));
         buttonsStartStopPanel.setPreferredSize(new Dimension(200, 200));
         buttonsStartStopPanel.setBackground(Color.decode("#E6E6FA"));
         dialog = new JDialog(frame, "Settings", true);
@@ -89,6 +89,7 @@ public class ControlPanel extends JPanel {
         startStopMoveAlbinos = new JButton("Stop albinos move");
         saveObjectsButton = new JButton("Save objects");
         loadObjectsButton = new JButton("Load objects");
+        consoleButton = new JButton("Console");
         periodOfOrdinary = new JTextField("1");
         periodOfAlbinos = new JTextField("2");
         percentOfAlbinos = new JTextField("50");
@@ -118,6 +119,7 @@ public class ControlPanel extends JPanel {
         startStopMoveAlbinos.setFocusable(false);
         saveObjectsButton.setFocusable(false);
         loadObjectsButton.setFocusable(false);
+        consoleButton.setFocusable(false);
 
         buttonsStartStopPanel.add(startButton);
         buttonsStartStopPanel.add(stopButton);
@@ -132,6 +134,7 @@ public class ControlPanel extends JPanel {
         buttonsLast.add(startStopMoveAlbinos);
         buttonsLast.add(saveObjectsButton);
         buttonsLast.add(loadObjectsButton);
+        buttonsLast.add(consoleButton);
         for (int i = 10; i<=100; i+=10){
             chanceOfOrdinary.addItem(i+"%");
         }
@@ -281,31 +284,36 @@ public class ControlPanel extends JPanel {
             dialog.setVisible(true);
         });
         saveObjectsButton.addActionListener(listener -> {
-            writeDat("config/objects.dat");
+            writeDat();
         });
         loadObjectsButton.addActionListener(listener -> {
-            readDat("config/objects.dat");
+            readDat();
+        });
+        consoleButton.addActionListener(listener -> {
+            console = new Console(frame ,habitat);
+            console.showConsole();
+
         });
         saveButton.addActionListener(listener -> {
             controller.stopCreateProcessFinally();
             boolean error = false;
             disableStopButton();
             String P1S = chanceOfOrdinary.getSelectedItem().toString();
-            if(ordinaryAIPriority.getSelectedItem().toString().equals("High")){
-                ordinaryAI.setPriority(Thread.MAX_PRIORITY);
-            } else if (ordinaryAIPriority.getSelectedItem().toString().equals("Low")) {
-                ordinaryAI.setPriority(Thread.MIN_PRIORITY);
-            } else {
-                ordinaryAI.setPriority(Thread.NORM_PRIORITY);
-            }
-
-            if(albinosAIPriority.getSelectedItem().toString().equals("High")){
-                albinosAI.setPriority(Thread.MAX_PRIORITY);
-            } else if (albinosAIPriority.getSelectedItem().toString().equals("Low")) {
-                albinosAI.setPriority(Thread.MIN_PRIORITY);
-            } else {
-                albinosAI.setPriority(Thread.NORM_PRIORITY);
-            }
+//            if(ordinaryAIPriority.getSelectedItem().toString().equals("High")){
+//                ordinaryAI.setPriority(Thread.MAX_PRIORITY);
+//            } else if (ordinaryAIPriority.getSelectedItem().toString().equals("Low")) {
+//                ordinaryAI.setPriority(Thread.MIN_PRIORITY);
+//            } else {
+//                ordinaryAI.setPriority(Thread.NORM_PRIORITY);
+//            }
+//
+//            if(albinosAIPriority.getSelectedItem().toString().equals("High")){
+//                albinosAI.setPriority(Thread.MAX_PRIORITY);
+//            } else if (albinosAIPriority.getSelectedItem().toString().equals("Low")) {
+//                albinosAI.setPriority(Thread.MIN_PRIORITY);
+//            } else {
+//                albinosAI.setPriority(Thread.NORM_PRIORITY);
+//            }
             try {
                 P1 = Integer.parseInt(P1S.substring(0, P1S.length() - 1));
                 N1 = Integer.parseInt(periodOfOrdinary.getText());
@@ -386,38 +394,43 @@ public class ControlPanel extends JPanel {
         this.albinosAI = albinosAI;
         this.ordinaryAI = ordinaryAI;
     }
-    private void writeDat(String fileName) {
-        ObjectOutputStream oos;
-        rabbitList = habitat.getRabbitsList();
+    private void writeDat() {
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(fileName, false));
-            for (Rabbit rabbit : rabbitList) {
-                System.out.println(rabbit.id);
-            }
-            oos.writeObject(rabbitList);
-            oos.close();
+            FileOutputStream fileOutputStream = new FileOutputStream(file);  // объект для записи байтов в файл
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream); //отвечает за вывод объяекта в поток
+            rabbitList = habitat.getRabbitsList();
+            Vector<Rabbit> obj = habitat.getRabbitsList();
+            //Rabbit obj = rabbitList.get(0);
+            objectOutputStream.writeObject(obj);
+            objectOutputStream.flush();
+            objectOutputStream.close();
         }
         catch(Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+                System.out.println(ex.getMessage());
+            }
+
     }
-    private void readDat(String fileName) {
-        ObjectInputStream ois;
+    private void readDat() {
         try {
-            ois = new ObjectInputStream(new FileInputStream(fileName));
+            FileInputStream fileInputStream = new FileInputStream(file);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            rabbitList = habitat.getRabbitsList();
+            rabbitList = habitat.getRabbitsList();
+            Vector<Rabbit> a = (Vector<Rabbit>)objectInputStream.readObject();
             rabbitList.clear();
             timeList.clear();
             idList.clear();
-            Vector<Rabbit> newArr = (Vector<Rabbit>) ois.readObject();
-            rabbitList = (Vector<Rabbit>) ois.readObject();
-
+            rabbitList.addAll(a);
             for (Rabbit rabbit : rabbitList) {
                 idList.add(Integer.toString(rabbit.id));
                 timeList.put(Integer.toString(rabbit.id), Integer.toString(habitat.totalTime));
             }
-            ois.close();
-        }
-        catch(Exception ex){
+            Rabbit obj = (Rabbit) objectInputStream.readObject();
+            rabbitList.add(obj);
+
+            objectInputStream.close();
+
+        }         catch(Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
@@ -472,7 +485,8 @@ public class ControlPanel extends JPanel {
         percentOfAlbinos.setText(newConfig[3]);
         livingTimeOrdinary.setText(newConfig[4]);
         livingTimeAlbinos.setText(newConfig[5]);
-        chanceOfOrdinary.setSelectedIndex(newConfig[0].charAt(0)-1);
+        System.out.println(Integer.parseInt(newConfig[0])/10-1);
+        chanceOfOrdinary.setSelectedIndex(Integer.parseInt(newConfig[0])/10-1);
         if(newConfig[6].equals("High")){
             ordinaryAIPriority.setSelectedIndex(0);
         } else if (newConfig[6].equals("Low")) {

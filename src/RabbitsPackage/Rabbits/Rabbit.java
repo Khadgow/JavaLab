@@ -6,7 +6,6 @@ public abstract class Rabbit implements IBehaviour, Serializable {
     private int x;
     private int y;
     public int id;
-    public static int countAllRabbits = 0;
 
     Rabbit(int x, int y, int id) {
         this.x = x;

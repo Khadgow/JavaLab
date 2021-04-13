@@ -4,9 +4,10 @@ import RabbitsPackage.Rabbits.*;
 import AppletModules.MyFrame;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.*;
 
-public class Habitat {
+public class Habitat implements Serializable {
     private int N1;
     private int N2;
     private int P1;
@@ -26,6 +27,11 @@ public class Habitat {
     private TreeSet<String> idList = new TreeSet<>();
     private HashMap<String,String> timeList = new HashMap<>();
     public int totalTime;
+
+    public int numberOfOrdinary = 0;
+    public int numberOfAlbinos = 0;
+    public int countAllRabbits = 0;
+
 
     public  Habitat(int N1, int N2, int P1, double K, MyFrame myframe, int livingTimeOrdinary, int livingTimeAlbinos) {
         this.N1 = N1;
@@ -49,7 +55,7 @@ public class Habitat {
     }
 
     boolean isAlbinosRabbitCreate(int N2, double K, int time) {
-        return time % N2 == 0 && AlbinosRabbit.numberOfAlbinos < (int) (Rabbit.countAllRabbits * K);
+        return time % N2 == 0 && numberOfAlbinos < (int) (countAllRabbits * K);
     }
 
     public int getWidth() {
@@ -76,6 +82,8 @@ public class Habitat {
                     if(rabbit.id == Integer.parseInt(id)){
                         if((rabbit instanceof OrdinaryRabbit && Integer.parseInt(timeList.get(id)) - time + livingTimeOrdinary <=0)
                                 || (rabbit instanceof AlbinosRabbit && Integer.parseInt(timeList.get(id)) - time + livingTimeAlbinos <=0)){
+                            if(rabbit instanceof OrdinaryRabbit) numberOfOrdinary--;
+                            if(rabbit instanceof AlbinosRabbit) numberOfAlbinos--;
                             timeList.remove(id);
                             removeId.add(id);
                             rabbitsList.remove(rabbit);
@@ -105,7 +113,10 @@ public class Habitat {
             Rabbit newRabbit = new OrdinaryRabbit(randomPoint.x, randomPoint.y, id);
             rabbitsList.add(newRabbit);
             controller.toPaint(rabbitsList);
+            numberOfOrdinary++;
+            countAllRabbits++;
         }
+
 
         if (isAlbinosRabbitCreate(N2, K, time)) {
             int id = (int)(Math.random()*10000);
@@ -120,6 +131,8 @@ public class Habitat {
 
             rabbitsList.add(newRabbit);
             controller.toPaint(rabbitsList);
+            countAllRabbits++;
+            numberOfAlbinos++;
         }
     }
 
@@ -151,9 +164,9 @@ public class Habitat {
     }
 
     public void refreshRabbitPopulation() {
-        OrdinaryRabbit.numberOfOrdinary = 0;
-        AlbinosRabbit.numberOfAlbinos = 0;
-        Rabbit.countAllRabbits = 0;
+        numberOfOrdinary = 0;
+        numberOfAlbinos = 0;
+        countAllRabbits = 0;
         rabbitsList = new Vector<Rabbit>();
     }
 
@@ -172,20 +185,20 @@ public class Habitat {
         this.K = Double.parseDouble(newSettings[3]);
         this.livingTimeOrdinary = Integer.parseInt(newSettings[4]);
         this.livingTimeAlbinos = Integer.parseInt(newSettings[5]);
-        if(newSettings[6].equals("High")){
-            ordinaryAI.setPriority(Thread.MAX_PRIORITY);
-        } else if (newSettings[6].equals("Low")) {
-            ordinaryAI.setPriority(Thread.MIN_PRIORITY);
-        } else {
-            ordinaryAI.setPriority(Thread.NORM_PRIORITY);
-        }
-        if(newSettings[7].equals("High")){
-            albinosAI.setPriority(Thread.MAX_PRIORITY);
-        } else if (newSettings[7].equals("Low")) {
-            albinosAI.setPriority(Thread.MIN_PRIORITY);
-        } else {
-            albinosAI.setPriority(Thread.NORM_PRIORITY);
-        }
+//        if(newSettings[6].equals("High")){
+//            ordinaryAI.setPriority(Thread.MAX_PRIORITY);
+//        } else if (newSettings[6].equals("Low")) {
+//            ordinaryAI.setPriority(Thread.MIN_PRIORITY);
+//        } else {
+//            ordinaryAI.setPriority(Thread.NORM_PRIORITY);
+//        }
+//        if(newSettings[7].equals("High")){
+//            albinosAI.setPriority(Thread.MAX_PRIORITY);
+//        } else if (newSettings[7].equals("Low")) {
+//            albinosAI.setPriority(Thread.MIN_PRIORITY);
+//        } else {
+//            albinosAI.setPriority(Thread.NORM_PRIORITY);
+//        }
     }
 
     public void changeSettings(int P1, int N1, int N2, double K, int livingTimeOrdinary, int livingTimeAlbinos){
@@ -211,4 +224,17 @@ public class Habitat {
     }
     public AlbinosRabbitAI getAlbinosAI() { return albinosAI; }
     public OrdinaryRabbitAI getOrdinaryAI() { return ordinaryAI; }
+    public void ReduceAlbinos(int count){
+        numberOfAlbinos-=count;
+        Vector<Rabbit> rabbitsToRemove = new Vector<Rabbit>();
+        for (Rabbit rabbit : rabbitsList){
+            if(rabbit instanceof AlbinosRabbit && count >0){
+                count--;
+                rabbitsToRemove.add(rabbit);
+            };
+        }
+        for (Rabbit rabbit : rabbitsToRemove){
+            rabbitsList.remove(rabbit);
+        }
+    }
 }
