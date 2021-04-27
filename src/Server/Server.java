@@ -1,4 +1,4 @@
-package AppletModules;
+package Server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,7 +13,7 @@ class Server {
     public static void main(String[] args) {
         try {
             System.out.println("Server is running");
-            int port = 3000;
+            int port = 3001;
             ServerSocket ss = new ServerSocket(port);
 
             Thread acceptor = new Thread(() -> {
@@ -37,7 +37,7 @@ class Server {
                 while (true) {
                     System.out.print("server > ");
                     String cmd = new Scanner(System.in).nextLine();
-                    if (cmd.equals("hosts")) {
+                    if (cmd.equals("clients")) {
                         System.out.println("---------------- CLIENTS ----------------");
                         for (NewClient host : hostList) {
                             System.out.print("name: " + host.getname());
@@ -45,7 +45,7 @@ class Server {
                         }
                         System.out.println("-----------------------------------------");
                     } else {
-                        System.out.println("Unknown command. Available: hosts");
+                        System.out.println("Unknown command. Available: clients");
                     }
                 }
             });

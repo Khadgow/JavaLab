@@ -26,7 +26,7 @@ public class MyFrame extends JFrame implements KeyListener {
     //------------------------------------------------------------------------
     private String host = "localhost";
     private String name;
-    private int port = 3000;
+    private int port = 3001;
     private Socket sock;
     private DataOutputStream outStream;
     private DataInputStream inStream;
@@ -142,12 +142,14 @@ public class MyFrame extends JFrame implements KeyListener {
                 showFinishDialog();
                 break;
             case 't':
-//                if(timeLabel.isVisible()){
-//                    controlPanel.disableShowButton();
-//                } else {
-//                    controlPanel.disableHideButton();
-//                }
-//                timeLabel.setVisible(!timeLabel.isVisible());
+                if(timeLabel.isVisible()){
+                    controlPanel.disableShowButton();
+                } else {
+                    controlPanel.disableHideButton();
+                }
+                timeLabel.setVisible(!timeLabel.isVisible());
+                break;
+            case 'q':
                 new NetworkDialog();
                 break;
         }
@@ -314,7 +316,6 @@ public class MyFrame extends JFrame implements KeyListener {
     }
 
     private class NetworkDialog extends JDialog {
-        private JTextField textField;
         private JButton buttonSEND;
         private JButton buttonDISCONNECT;
         private int DIALOG_WIDTH = 200;

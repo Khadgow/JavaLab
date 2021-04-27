@@ -2,15 +2,17 @@ package AppletModules;
 
 import RabbitsPackage.ControlFiles.Controller;
 import RabbitsPackage.ControlFiles.Habitat;
-import RabbitsPackage.Rabbits.AlbinosRabbitAI;
-import RabbitsPackage.Rabbits.OrdinaryRabbitAI;
-import RabbitsPackage.Rabbits.Rabbit;
+import RabbitsPackage.Rabbits.*;
+import Server.Const;
+import Server.DatabaseHandler;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -36,6 +38,7 @@ public class ControlPanel extends JPanel {
     JButton saveObjectsButton;
     JButton loadObjectsButton;
     JButton consoleButton;
+    JButton databaseButton;
     JRadioButton showTimeButton;
     JRadioButton hideTimeButton;
     JDialog dialog;
@@ -71,12 +74,11 @@ public class ControlPanel extends JPanel {
         buttonsStartStopPanel = new JPanel(new GridLayout(2, 1));
         buttonsShowHideGroup  = new ButtonGroup ();
         buttonsShowHidePanel = new JPanel(new GridLayout(2, 1));
-        buttonsLast = new JPanel(new GridLayout(8, 1));
+        buttonsLast = new JPanel(new GridLayout(9, 1));
         buttonsStartStopPanel.setPreferredSize(new Dimension(200, 200));
         buttonsStartStopPanel.setBackground(Color.decode("#E6E6FA"));
         dialog = new JDialog(frame, "Settings", true);
         configurationPanel = new JPanel(new GridLayout(8, 2));
-
 
         startButton = new JButton("Start");
         stopButton = new JButton("Stop");
@@ -89,6 +91,7 @@ public class ControlPanel extends JPanel {
         startStopMoveAlbinos = new JButton("Stop albinos move");
         saveObjectsButton = new JButton("Save objects");
         loadObjectsButton = new JButton("Load objects");
+        databaseButton = new JButton("Database");
         consoleButton = new JButton("Console");
         periodOfOrdinary = new JTextField("1");
         periodOfAlbinos = new JTextField("2");
@@ -120,6 +123,7 @@ public class ControlPanel extends JPanel {
         saveObjectsButton.setFocusable(false);
         loadObjectsButton.setFocusable(false);
         consoleButton.setFocusable(false);
+        databaseButton.setFocusable(false);
 
         buttonsStartStopPanel.add(startButton);
         buttonsStartStopPanel.add(stopButton);
@@ -135,6 +139,7 @@ public class ControlPanel extends JPanel {
         buttonsLast.add(saveObjectsButton);
         buttonsLast.add(loadObjectsButton);
         buttonsLast.add(consoleButton);
+        buttonsLast.add(databaseButton);
         for (int i = 10; i<=100; i+=10){
             chanceOfOrdinary.addItem(i+"%");
         }
@@ -371,6 +376,10 @@ public class ControlPanel extends JPanel {
             objectsFrame.setVisible(true);
             controller.startCreateProcess();
         });
+        databaseButton.addActionListener(listener -> {
+            DataBaseDialog dbDialog = new DataBaseDialog();
+            dbDialog.setVisible(true);
+        });
     }
 
     public void configureController(Controller controller) {
@@ -502,5 +511,126 @@ public class ControlPanel extends JPanel {
         } else {
             albinosAIPriority.setSelectedIndex(2);
         }
+    }
+
+    private class DataBaseDialog extends JDialog {
+
+        public DataBaseDialog() {
+            super(frame, "Database",false);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            setSize(new Dimension(300,400));
+            setAlwaysOnTop(true);
+            setLayout(new GridLayout(6,1));
+
+
+            JButton postAllRabbits = new JButton("post all rabbits");
+            postAllRabbits.setFocusable(false);
+            JButton postOrdinaryRabbits = new JButton("post ordinary rabbits");
+            postOrdinaryRabbits.setFocusable(false);
+            JButton postAlbinosRabbits = new JButton("post albinos rabbits");
+            postAlbinosRabbits.setFocusable(false);
+            JButton getAllRabbits = new JButton("get all rabbits");
+            getAllRabbits.setFocusable(false);
+            JButton getOrdinaryRabbits = new JButton("get ordinary rabbits");
+            getOrdinaryRabbits.setFocusable(false);
+            JButton getAlbinosRabbits = new JButton("get albinos rabbits");
+            getAlbinosRabbits.setFocusable(false);
+            add(postAllRabbits);
+            add(postOrdinaryRabbits);
+            add(postAlbinosRabbits);
+            add(getAllRabbits);
+            add(getOrdinaryRabbits);
+            add(getAlbinosRabbits);
+            DatabaseHandler dbHandler = new DatabaseHandler();
+            postAllRabbits.addActionListener(listener -> {
+                dbHandler.deleteAllRabbits();
+                rabbitList=habitat.getRabbitsList();
+                for (Rabbit rabbit : rabbitList){
+                    if(rabbit instanceof AlbinosRabbit){
+                        dbHandler.postRabbit(rabbit.id, rabbit.getX(), rabbit.getY(), "albinos");
+                    } else {
+                        dbHandler.postRabbit(rabbit.id, rabbit.getX(), rabbit.getY(), "ordinary");
+                    }
+                }
+            });
+            postAlbinosRabbits.addActionListener(listener -> {
+                dbHandler.deleteRabbitsByType("albinos");
+                rabbitList=habitat.getRabbitsList();
+                for (Rabbit rabbit : rabbitList){
+                    if(rabbit instanceof AlbinosRabbit){
+                        dbHandler.postRabbit(rabbit.id, rabbit.getX(), rabbit.getY(), "albinos");
+                    }
+                }
+            });
+            postOrdinaryRabbits.addActionListener(listener -> {
+                dbHandler.deleteRabbitsByType("ordinary");
+                rabbitList=habitat.getRabbitsList();
+                for (Rabbit rabbit : rabbitList){
+                    if(rabbit instanceof OrdinaryRabbit){
+                        dbHandler.postRabbit(rabbit.id, rabbit.getX(), rabbit.getY(), "ordinary");
+                    }
+                }
+            });
+            getAllRabbits.addActionListener(listener -> {
+                rabbitList = habitat.getRabbitsList();
+                rabbitList.clear();
+                ResultSet rabbits = dbHandler.getAllRabbits();
+                try {
+                    while (rabbits.next()) {
+
+                        int id = rabbits.getInt(Const.RABBITS_ID);
+                        int cord_x = rabbits.getInt(Const.CORD_X);
+                        int cord_y = rabbits.getInt(Const.CORD_Y);
+                        String type = rabbits.getString(Const.TYPE);
+                        if (type.equals("albinos")) {
+                            rabbitList.add(new AlbinosRabbit(cord_x, cord_y, id));
+                        } else {
+                            rabbitList.add(new OrdinaryRabbit(cord_x, cord_y, id));
+                        }
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+
+            });
+
+            getOrdinaryRabbits.addActionListener(listener -> {
+                rabbitList = habitat.getRabbitsList();
+                rabbitList.clear();
+                ResultSet rabbits = dbHandler.getRabbitsByType("ordinary");
+                try {
+
+                    while (rabbits.next()) {
+
+                        int id = rabbits.getInt(Const.RABBITS_ID);
+                        int cord_x = rabbits.getInt(Const.CORD_X);
+                        int cord_y = rabbits.getInt(Const.CORD_Y);
+                        rabbitList.add(new OrdinaryRabbit(cord_x, cord_y, id));
+
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            });
+
+            getAlbinosRabbits.addActionListener(listener -> {
+                rabbitList = habitat.getRabbitsList();
+                rabbitList.clear();
+                ResultSet rabbits = dbHandler.getRabbitsByType("albinos");
+                try {
+                    while (rabbits.next()) {
+
+
+                        int id = rabbits.getInt(Const.RABBITS_ID);
+                        int cord_x = rabbits.getInt(Const.CORD_X);
+                        int cord_y = rabbits.getInt(Const.CORD_Y);
+                        rabbitList.add(new AlbinosRabbit(cord_x, cord_y, id));
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            });
+        }
+
     }
 }
